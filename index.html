@@ -1,0 +1,1003 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <title>美的荆州工厂班车线路图</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+    <style>
+    body,
+    html,
+    #container {
+        overflow: hidden;
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        font-family: "微软雅黑";
+    }
+	   #result{
+	   position: fixed;
+	   top: 10px;
+	   left: 10px;
+	  
+	   width: 250px;
+	   height: 30px;
+	   line-height: 30px;
+	   text-align: center;
+	   background: #fff;
+	   box-shadow: 0 2px 6px 0 rgba(27, 142, 236, 0.5);
+	   border-radius: 7px;
+	   z-index: 999;
+   }
+   .info {
+        z-index: 999;
+        width: auto;
+        min-width: 22rem;
+        padding: .75rem 1.25rem;
+        margin-left: 1.25rem;
+        position: fixed;
+        top: 1rem;
+        background-color: rgba(265, 265, 265, 0.9);
+        border-radius: .25rem;
+        font-size: 14px;
+        color: #666;
+        box-shadow: 0 2px 6px 0 rgba(27, 142, 236, 0.3);
+    }
+    #zoominput {
+        height: 24px;
+        width: 80px;
+        padding-left: 8px;
+    }
+    #change-btn {
+        height: 30px;
+        background: #5679ea;
+        border: 0;
+        padding: 0 10px 0 10px;
+        margin: 10px 8px 0 0;
+        cursor: pointer;
+        border-radius: 2px;
+        color: #fff;
+        font-size: 14px;
+    }
+	 ul li {
+        list-style: none;
+    }
+    .btn-wrap {
+        z-index: 999;
+        position: fixed;
+        bottom: 3.5rem;
+      
+        
+        border-radius: .25rem;
+        background-color: #fff;
+        box-shadow: 0 2px 6px 0 rgba(27, 142, 236, 0.5);
+		margin:0;
+		padding:10px;
+    }
+    .btn {
+       
+       
+      
+        background-color: #fff;
+        color: rgba(27, 142, 236, 1);
+        font-size: 14px;
+        border:1px solid rgba(27, 142, 236, 1);
+        border-radius: 5px;
+        margin: 0 5px;
+        text-align: center;
+        line-height: 30px;
+    }
+    .btn:hover {
+        background-color: rgba(27, 142, 236, 0.8);
+        color: #fff;
+    }
+    </style>
+    <script src="https://api.map.baidu.com/api?type=webgl&v=3.0&ak=kjq4oyH6ACG7i5cchezjzP1Za9dan4Dz"></script>
+	<script type="text/javascript" src="//api.map.baidu.com/library/TrackAnimation/src/TrackAnimation_min.js"></script>
+</head>
+<body>
+ <div id='result'>美的荆州工厂班车线路图</div>
+    <div id="container"></div>
+	  
+	    
+	
+    <div id="container"></div>
+	  <ul class="btn-wrap" style="z-index: 99;bottom:0">
+        <li class = "light btn" onclick = "mAddOverlay(0)">01号车</li>
+       <li class = "light btn" onclick = "mAddOverlay(1)">02号车</li>
+	    <li class = "light btn" onclick = "mAddOverlay(2)">03号车</li>
+		 <li class = "light btn" onclick = "mAddOverlay(3)">05号车</li>
+		  <li class = "light btn" onclick = "mAddOverlay(4)">06号车</li>
+		   <li class = "light btn" onclick = "mAddOverlay(5)">07号车</li>
+		    <li class = "light btn" onclick = "mAddOverlay(6)">08号车</li>
+			 <li class = "light btn" onclick = "mAddOverlay(7)">09号车</li>
+			  <li class = "light btn" onclick = "mAddOverlay(8)">10号车</li>
+			   <li class = "light btn" onclick = "mAddOverlay(9)">11号车</li>
+			    <li class = "light btn" onclick = "mAddOverlay(10)">12号车</li>
+				 <li class = "light btn" onclick = "mAddOverlay(11)">13号车</li>
+				  <li class = "light btn" onclick = "mAddOverlay(12)">16号车</li>
+				   <li class = "light btn" onclick = "mAddOverlay(13)">19号车</li>
+				    <li class = "light btn" onclick = "mAddOverlay(14)">20号车</li>
+					  <li class = "light btn" onclick = "removeOverlay()">清除显示</li>
+					    <li class = "light btn" onclick = "addAllList()">全部线路</li>
+						  <li class = "light btn" onclick = "addAllMarker()">全部站点</li>
+						    <li class = "light btn" onclick = "addAllPath()">全部路线</li>
+    </ul>
+</body>
+</html>
+<script>
+var terminal={'stop':'美的冰箱工业园','add':'湖北省荆州市沙市区东方大道38号','lng':112.341801,'lat':30.326438,'show':false};
+var map = new BMapGL.Map('container', {
+    minZoom: 14,
+    maxZoom: 18
+}); // 创建Map实例
+map.centerAndZoom(new BMapGL.Point(terminal.lng, terminal.lat), 15); // 初始化地图,设置中心点坐标和地图级别
+map.enableScrollWheelZoom(true); // 开启鼠标滚轮缩放
+
+
+ 
+	//map.setMapType(BMAP_EARTH_MAP);      // 设置地图类型为地球模式
+
+/*/
+var geolocation = new BMapGL.Geolocation();
+geolocation.getCurrentPosition(function(r){
+	if(this.getStatus() == BMAP_STATUS_SUCCESS){
+		var mk = new BMapGL.Marker(r.point);
+		map.addOverlay(mk);
+		map.panTo(r.point);
+		//alert('您的位置：'+r.point.lng+','+r.point.lat);
+		
+		
+		
+	}
+	else {
+		alert('failed'+this.getStatus());
+	}        
+});/*/
+
+
+
+function setNewZoom() {
+    var zoom = document.getElementById('zoominput').value;
+    map.setZoom(zoom);
+}
+function getMapZoom() {
+    alert(map.getZoom());
+}
+//站点数据
+//Where is the origin stop
+
+var crossroads =[
+{index:0,'stop':'艾尔米酒店','add':'北京路与三湾路交叉口','lng':112.289839,'lat':30.298594,'show':false},
+{index:1,'stop':'三湾路','add':'','lng':112.293935,'lat':30.301408,'show':false},
+{index:2,'stop':'三湾路转盘','add':'三湾路与江津路交汇处','lng':112.29491,'lat':30.302803,'show':false},
+{index:3,'stop':'红绿灯','add':'王家港路与江津路交汇处','lng':112.322353,'lat':30.285816,'show':false},
+{index:4,'stop':'红绿灯','add':'东方大道与江津路交汇处','lng':112.335585,'lat':30.282487,'show':false},
+{index:5,'stop':'红绿灯','add':'东方大道与荆沙大道交汇处','lng':112.336666,'lat':30.292881,'show':false},
+{index:6,'stop':'宿驾转盘','add':'东方大道与沙岑路交汇处','lng':112.338585,'lat':30.311915,'show':false},
+{index:7,'stop':'红绿灯','add':'工农路与长岗路交汇处','lng':112.259199,'lat':30.331167,'show':false},
+{index:8,'stop':'红绿灯','add':'江汉路与长岗路交汇处','lng':112.269198,'lat':30.327573,'show':false},
+{index:9,'stop':'红绿灯','add':'红门路与长岗路交汇处','lng':112.273029,'lat':30.324448,'show':false},
+{index:10,'stop':'红绿灯','add':'红门路与荆沙大道交汇处','lng':112.275239,'lat':30.329323,'show':false},
+{index:11,'stop':'红绿灯','add':'月堤路与荆沙大道交汇处','lng':112.31555,'lat':30.299553,'show':false},
+{index:12,'stop':'红绿灯','add':'王家港路与荆沙大道交汇处','lng':112.325485,'lat':30.295476,'show':false},
+{index:13,'stop':'红绿灯','add':'318国道与东方大道交汇处','lng':112.352349,'lat':30.362254,'show':false},
+{index:14,'stop':'红绿灯','add':'园林北路桥头，北面','lng':112.282398,'lat':30.351464,'show':false},
+{index:15,'stop':'红绿灯','add':'园林北路与西湖路交汇处','lng':112.282551,'lat':30.35363,'show':false},
+{index:16,'stop':'红绿灯','add':'园林北路与318国道交汇处','lng':112.282722,'lat':30.357572,'show':false},
+{index:17,'stop':'红绿灯','add':'园林北路与银湖路交汇处','lng':112.282824,'lat':30.360101,'show':false},
+{index:18,'stop':'红绿灯','add':'红门路与银湖路交汇处','lng':112.291259,'lat':30.360429,'show':false},
+{index:19,'stop':'红绿灯','add':'红门路与318国道交汇处','lng':112.291259,'lat':30.357928,'show':false},
+{index:20,'stop':'红绿灯','add':'清河路与318国道交汇处','lng':112.301384,'lat':30.368054,'show':false},
+{index:21,'stop':'红绿灯','add':'红星路与江津路交汇处','lng':112.27814,'lat':30.316421,'show':false},
+{index:22,'stop':'红绿灯','add':'豉湖路与江津路交汇处','lng':112.286382,'lat':30.310209,'show':false},
+{index:23,'stop':'红绿灯','add':'红星路与北京路交汇处','lng':112.273842,'lat':30.309152,'show':false},
+{index:24,'stop':'红绿灯','add':'月堤路与江津路交汇处','lng':112.312626,'lat':30.291613,'show':false},
+{index:25,'stop':'红绿灯','add':'北京路与太岳路交叉口','lng':112.237384,'lat':30.336901,'show':false},
+{index:26,'stop':'红绿灯','add':'北京路与武德路交叉口','lng':112.23212,'lat':30.342792,'show':false},
+{index:27,'stop':'红绿灯','add':'太岳东路与太岳路交叉口','lng':112.247877,'lat':30.344074,'show':false},
+{index:28,'stop':'红绿灯','add':'太岳东路与河滨路交叉口','lng':112.251326,'lat':30.339492,'show':false},
+{index:29,'stop':'红绿灯','add':'新天地十字路口','lng':112.253675,'lat':30.338978,'show':false},
+{index:30,'stop':'红绿灯','add':'北京路与白云路交叉口','lng':112.244418,'lat':30.330145,'show':false},
+{index:31,'stop':'红绿灯','add':'江津路与白云路交叉口','lng':112.250176,'lat':30.333472,'show':false},
+{index:32,'stop':'红绿灯','add':'豉湖路与沙岑路交汇处','lng':112.295294,'lat':30.319694,'show':false},
+{index:33,'stop':'红绿灯','add':'豉湖路与荆沙大道交汇处','lng':112.292356,'lat':30.316553,'show':false},
+{index:34,'stop':'红绿灯','add':'王家港路与沙岑路交汇处','lng':112.32955,'lat':30.3128,'show':false},
+{index:35,'stop':'红绿灯','add':'318国道与荆沙大道交汇处','lng':112.250141,'lat':30.353246,'show':false},
+{index:36,'stop':'红绿灯','add':'塔桥路与荆沙大道交汇处','lng':112.256043,'lat':30.343226,'show':false},
+{index:37,'stop':'红绿灯','add':'园林北路与荆沙大道交汇处','lng':112.266675,'lat':30.335687,'show':false},
+{index:38,'stop':'红绿灯','add':'江汉路与江津路交汇处','lng':112.265985,'lat':30.321459,'show':false},
+{index:39,'stop':'红绿灯','add':'塔桥路与江津路交汇处','lng':112.252057,'lat':30.332116,'show':false},
+{index:40,'stop':'红绿灯','add':'工农路与江津路交汇处','lng':112.257559,'lat':30.327986,'show':false},
+{index:41,'stop':'红绿灯','add':'工农路与荆沙大道交汇处','lng':112.2632,'lat':30.338214,'show':false},
+{index:42,'stop':'红绿灯','add':'红门路与北京路交汇处','lng':112.267126,'lat':30.311323,'show':false},
+ {index:43,'stop':'红绿灯','add':'红门路与江津路交汇处','lng':112.270768,'lat':30.319425,'show':false},
+ 
+
+];
+//
+//线路
+/*燎原公交车站
+东区客运站
+途径公交车：2路; 5路; 11路; 13路; 19路; 27路; 29路; 41路; 55路; 103路
+坐标：112.295091,30.293474
+省电二处
+途径公交车：55路
+坐标：112.291621,30.296866
+东印
+途径公交车：11路; 29路; 41路
+坐标：112.297647,30.291015
+
+月堤路
+途径公交车：2路; 5路; 11路; 13路; 27路; 29路; 41路; 55路
+坐标：112.309442,30.282802
+
+钢管厂
+途径公交车：2路; 11路; 13路; 27路; 29路; 41路; 55路
+坐标：112.314614,30.279234
+
+沙市农场
+途径公交车：11路; 13路; 27路; 29路; 41路
+坐标：112.322352,30.266082
+
+王桥转盘
+112.333255,30.258813
+东方大道沿线*/
+
+var path01=[
+{stop:'东区客运站',add:'东区客运站,燎原公交车站,中国工商银行(荆州燎原支行)门口','lng':112.295091,'lat':30.293474,'show':true},
+{stop:'东印',add:'望江国际','lng':112.297647,'lat':30.291015,'show':true},
+{stop:'月堤路',add:'月堤路','lng':112.309442,'lat':30.282802,'show':true},
+{stop:'钢管厂',add:'钢管厂后门','lng':112.314614,'lat':30.279234,'show':true},
+{stop:'沙市农场',add:'沙市农场农厂东边','lng':112.322352,'lat':30.266082,'show':true},
+{stop:'王桥转盘',add:'王桥转盘','lng':112.333255,'lat':30.258813,'show':true},
+//{stop:'东方大道沿线',add:'湖北省荆州市沙市区东方大道38号','lng':112.307571,'lat':30.294821,'show':true},
+crossroads[5],terminal
+];
+
+
+
+var path02=[
+{'stop':'豉湖路','add':'朝阳,中国工商银行(沙市支行)（工商银行）门口','lng':112.279156,'lat':30.305696,'show':true},
+{'stop':'沙棉','add':'湖北省荆州市沙市区北京东路193-1号附近','lng':112.285203,'lat':30.301688,'show':true},
+{'stop':'三医','add':'荆州市第三人民医院对面','lng':112.28822,'lat':30.299686,'show':true},
+crossroads[0],crossroads[1],crossroads[2],
+{'stop':'教育学院','add':'教育学院对面座车','lng':112.298949,'lat':30.300324,'show':true},
+{'stop':'合汇公园天下','add':'','lng':112.307571,'lat':30.294821,'show':true},
+crossroads[3],crossroads[4],crossroads[5],crossroads[6],terminal
+
+];
+/*
+
+
+未来馨居
+途径公交车：4路; 28路
+坐标：112.271283,30.325876
+
+恒隆四季城（改成三湾路东站，和市救助站）
+
+三湾路东站
+途径公交车：50路; kw1路
+坐标：112.302181,30.309367
+
+市救助站
+途径公交车：50路; kw1路
+坐标：112.305966,30.306516
+
+
+
+
+东方大道西口
+途径公交车：50路; kw1路
+坐标：112.335139,30.293147*/
+var path03=[
+{stop:'工农路北',add:'','lng':112.262035,'lat':30.336477,'show':true},
+{stop:'沙市大学',add:'无公交站牌','lng':112.260894,'lat':30.334509,'show':true},
+crossroads[7],
+{stop:'黎园小区',add:'（长港路富迪改为梨园小区）','lng':112.2663,'lat':30.328603,'show':true},
+crossroads[8],
+{stop:'未来馨居',add:'未来馨居，蛇入山','lng':112.271283,'lat':30.325876,'show':true},
+crossroads[9],crossroads[10],
+{stop:'三湾路东站',add:'恒隆四季城改成三湾路东站，和市救助站','lng':112.302181,'lat':30.309367,'show':true},
+{stop:'市救助站',add:'恒隆四季城改成三湾路东站，和市救助站','lng':112.305966,'lat':30.306516,'show':true},
+crossroads[11],crossroads[12],
+{stop:'东方大道西口',add:'东方玫瑰园改为东方大道西口','lng':112.335139,'lat':30.293147,'show':true},
+crossroads[5],crossroads[6],terminal
+];
+var path04=[
+
+];
+
+/*东岳怡景
+
+荆沙大道与园林路交叉路口
+112.267358,30.336454
+
+体育馆西路
+途径公交车：104路
+坐标：112.27274,30.342772
+
+园林北路桥头
+
+园林北路318路口
+途径公交车：3路; 7路; 33路; 35路; 35路区间
+坐标：112.282698,30.355918
+
+
+十号路口
+途径公交车：33路; 34路; 潜江67路; 新7路
+坐标：112.290038,30.357034
+十号路/沪聂线(路口)
+地址：荆州市沙市区G318
+坐标：112.291245,30.357968
+关沮小学
+途径公交车：3路; 7路; 33路; 34路
+坐标：112.29686,30.358062
+银湖工业园
+途径公交车：3路; 7路; 33路; 34路
+坐标：112.299348,30.359726
+
+关沮
+途径公交车：3路; 7路; 33路; 34路
+坐标：112.303595,30.370171
+
+关沮四组
+途径公交车：7路; 33路; 34路
+坐标：112.31251,30.371294
+
+长湖村
+途径公交车：7路; 33路; 34路
+坐标：112.323275,30.366895
+向湖村
+途径公交车：7路; 33路; 34路
+坐标：112.328971,30.364468
+河垱村
+途径公交车：7路; 33路; 34路
+坐标：112.337124,30.362818
+
+锣场派出所
+途径公交车：7路; 33路; 34路
+坐标：112.342406,30.361717
+
+锣场卫生院
+途径公交车：7路; 33路; 34路
+坐标：112.34582,30.360991
+
+*/
+
+var path05=[
+{stop:'东岳怡景',add:'东岳怡景改为（园林北路），体育馆西路','lng':112.267358,'lat':30.336454,'show':true},
+{stop:'体育馆西路',add:'东岳怡景改为（园林北路），体育馆西路','lng':112.27274,'lat':30.342772,'show':true},
+crossroads[14],crossroads[15],crossroads[16],crossroads[17],crossroads[18],
+{stop:'十号路',add:'十号路与老318国道交叉口，红门路与聂沪线交叉口','lng':112.291245,'lat':30.357968,'show':true},
+{stop:'关沮小学',add:'关沮小学','lng':112.29686,'lat':30.358062,'show':false},
+{stop:'银湖工业园',add:'银湖工业园','lng':112.299348,'lat':30.359726,'show':false},
+crossroads[20],
+{stop:'关沮',add:'关沮','lng':112.303595,'lat':30.370171,'show':false},
+{stop:'关沮四组',add:'关沮四组','lng':112.31251,'lat':30.371294,'show':false},
+{stop:'长湖村',add:'长湖村','lng':112.323275,'lat':30.366895,'show':true},
+{stop:'向湖村',add:'向湖村','lng':112.328971,'lat':30.364468,'show':true},
+{stop:'河垱村',add:'河垱村','lng':112.337124,'lat':30.362818,'show':true},
+{stop:'锣场派出所',add:'湖北省荆州市沙市区东方大道38号','lng':112.342406,'lat':30.361717,'show':true},
+{stop:'锣场镇',add:'湖北省荆州市沙市区东方大道38号','lng':112.34582,'lat':30.360991,'show':true},
+crossroads[13],terminal
+];
+
+
+
+/*三纺
+途径公交车：4路
+坐标：112.281531,30.319553
+
+
+玉桥小区
+途径公交车：9路; 10路; 17路; 19路; 28路; 39路; 70路
+坐标：112.282153,30.313351
+
+机械电子学校
+途径公交车：70路
+坐标：112.318786,30.287715
+王家港路南
+途径公交车：70路
+坐标：112.323272,30.29044
+*/
+
+var path06=[
+{stop:'三纺',add:'三纺大门口不能停','lng':112.281531,'lat':30.319553,'show':true},
+crossroads[21],
+{stop:'玉桥小区',add:'玉桥','lng':112.282153,'lat':30.313351,'show':true},
+crossroads[22],
+crossroads[2],
+{stop:'机械电子学校',add:'津东新村和幸福新村','lng':112.318786,'lat':30.287715,'show':true},
+terminal
+];
+/*沙市中商百货(红门路)
+途径公交车：52路
+坐标：112.26864,30.310743
+
+
+
+红星路小学
+途径公交车：9路; 70路
+坐标：112.274522,30.310516
+
+金隆大厦
+途径公交车：9路; 10路; 70路
+坐标：112.275687,30.312825
+
+范家渊公园门口
+目前无站牌
+途径公交车：
+坐标：112.325731,30.284694
+
+
+
+金源世纪城
+途径公交车：70路; kw4路
+坐标：112.333671,30.282673
+
+*/
+
+var path07=[
+{stop:'沙市中商百货(红门路)',add:'万家福购物广场','lng':112.26864,'lat':30.310743,'show':true},
+crossroads[23],
+{stop:'红星路小学',add:'老八宝','lng':112.274522,'lat':30.310516,'show':true},
+{stop:'金隆大厦',add:'金隆大厦','lng':112.275687,'lat':30.312825,'show':true},
+crossroads[21],crossroads[22],crossroads[2],crossroads[24],crossroads[3],
+{stop:'范家渊',add:'范家渊公园门口','lng':112.325731,'lat':30.284694,'show':true},
+{stop:'金源世纪城',add:'金源世纪城','lng':112.333671,'lat':30.282673,'show':true},
+terminal
+];
+
+/*天发加油站
+中国石化(京陵加油站)
+地址：学苑路126号
+电话：(0716)8471595
+坐标：112.201421,30.342311
+
+
+
+老南门外
+途径公交车：4路; 23路; 23路东门方向; 25路; 30路
+坐标：112.20509,30.342116
+
+职业技术学院
+途径公交车：4路; 15路; 23路; 23路东门方向; 56路
+坐标：112.210153,30.342339
+
+汉科
+金九龙大酒店
+途径公交车：4路; 15路; 17路; 23路; 23路东门方向; 25路; 30路; 56路
+坐标：112.216381,30.34211
+
+石油学院
+
+油苑小区
+途径公交车：23路; 23路东门方向; 30路; 56路
+坐标：112.226336,30.341857
+
+
+武德路
+
+途径公交车：23路; 103路
+坐标：112.232765,30.342142
+太岳路
+太岳路金凤凰冠大酒店
+途径公交车：103路
+坐标：112.236561,30.337739
+
+
+雷家垱
+
+雷家垱
+途径公交车：27路; 42路; 49路; 51路
+坐标：112.255014,30.341974
+上复兴大道*/
+
+var path08=[
+{stop:'天发加油站',add:'中国石化(京陵加油站)加油站门口上车，掉头','lng':112.201421,'lat':30.342311,'show':true},
+{stop:'御路口',add:'老南门外','lng':112.199175,'lat':30.342022,'show':true},
+{stop:'职业技术学院',add:'职业技术学院','lng':112.210153,'lat':30.342339,'show':true},
+{stop:'汉科',add:'金九龙大酒店','lng':112.216381,'lat':30.34211,'show':true},
+{stop:'石油学院',add:'油苑小区','lng':112.226336,'lat':30.341857,'show':true},
+{stop:'长大武德校区',add:'长大武德校区','lng':112.230952,'lat':30.341592,'show':false},
+crossroads[26],
+{stop:'武德路',add:'北京西路上','lng':112.232765,'lat':30.342142,'show':true},
+{stop:'太岳路',add:'太岳路金凤凰冠大酒店站','lng':112.236561,'lat':30.337739,'show':true},
+crossroads[25],crossroads[27],crossroads[28],crossroads[29],
+{stop:'雷家垱',add:'雷家垱','lng':112.255014,'lat':30.341974,'show':true},
+terminal
+];
+/*古白云桥
+途径公交车：31路; 101路; 103路
+坐标：112.241709,30.332997
+青少年宫
+途径公交车：12路; 19路; 24路; 39路
+坐标：112.253747,30.330795
+洪家垸
+途径公交车：12路; 19路; 24路; 39路
+坐标：112.256313,30.328673
+二医(江津路站)
+途径公交车：19路
+坐标：112.260157,30.326088
+江津邮局
+江津客运站
+途径公交车：3路; 7路; 19路; 24路; 27路; 35路; 35路区间; 39路; 潜江67路; 新7路
+坐标：112.264881,30.322308
+大润发
+途径公交车：8路
+坐标：112.267904,30.320644
+市中医院
+途径公交车：9路; 10路; 17路; 19路; 28路; 39路; 70路
+坐标：112.279623,30.31529
+开发区管委会
+中豪明珠城
+途径公交车：17路; 39路
+坐标：112.290051,30.314082
+宿架转盘（沙岑路）
+途径公交车：39路; 69路
+坐标：112.337757,30.31195*/
+
+
+var path09=[
+{stop:'古白云桥',add:'','lng':112.241709,'lat':30.332997,'show':true},
+crossroads[30],crossroads[31],
+{stop:'青少年宫',add:'青少年宫对面座车','lng':112.253747,'lat':30.330795,'show':true},
+{stop:'洪家垸',add:'石油大厦下面座车','lng':112.256313,'lat':30.328673,'show':true},
+{stop:'二医',add:'二医门口站牌座车','lng':112.260157,'lat':30.326088,'show':true},
+{stop:'江津客运站',add:'江津邮局，邮局对面的车站站牌','lng':112.264881,'lat':30.322308,'show':true},
+{stop:'市中医院',add:'中医院对面座车','lng':112.279623,'lat':30.31529,'show':true},
+crossroads[22],
+{stop:'开发区管委会',add:'开发区管委会对面，中豪明珠城','lng':112.290051,'lat':30.314082,'show':true},
+crossroads[33],crossroads[11],crossroads[12],crossroads[34],
+{stop:'宿驾转盘（沙岑路）',add:'久隆汽车动力转向器公司对面座车','lng':112.337757,'lat':30.31195,'show':true},
+terminal
+];
+
+
+/*花台
+途径公交车：6路; 12路; 14路; 15路; 19路; 20路; 21路; 23路; 23路东门方向; 26路; 32路; 33路; 34路; 51路; 61路; 101路; 103路
+坐标：112.199458,30.35844
+荆州天桥
+途径公交车：6路; 12路; 14路; 15路; 19路; 20路; 21路; 23路; 23路东门方向; 26路; 32路; 33路; 34路; 44路; 47路; 51路; 61路; 101路; 103路
+坐标：112.208575,30.357947
+江陵车站
+钟鼓楼
+途径公交车：6路; 14路; 15路; 19路; 20路; 21路; 23路; 23路东门方向; 32路; 33路; 34路; 44路; 47路; 51路; 61路; 101路; 103路
+坐标：112.211242,30.353682
+碑苑
+张居正故居
+途径公交车：6路; 12路; 14路; 15路; 18路; 19路; 20路; 21路; 23路; 23路东门方向; 32路; 33路; 34路; 44路; 47路; 51路; 61路; 101路; 103路
+坐标：112.220748,30.352435
+荆州市华康医院
+江津路东门
+途径公交车：6路; 12路; 14路; 19路; 24路; 33路; 51路
+坐标：112.226403,30.351759
+三维？？？？
+人力资源市场
+途径公交车：6路; 12路; 14路; 18路; 19路; 24路; 33路; 51路
+坐标：112.232835,30.350946
+
+
+投资广场
+
+汉口银行市公证处
+途径公交车：19路; 24路
+坐标：112.238227,30.348022
+北湖小区
+途径公交车：10路; 12路; 18路; 19路; 24路; 30路; 39路
+坐标：112.241107,30.346214
+七一一厂
+途径公交车：10路; 12路; 18路; 19路; 24路; 30路
+坐标：112.2441,30.343137*/
+var path10=[
+{stop:'花台',add:'中心医院对面','lng':112.199458,'lat':30.35844,'show':true},
+{stop:'天桥',add:'好邻居超市对面','lng':112.208575,'lat':30.357947,'show':true},
+{stop:'钟鼓楼',add:'江陵车站','lng':112.211242,'lat':30.353682,'show':true},
+{stop:'碑苑',add:'张居正故居','lng':112.220748,'lat':30.352435,'show':true},
+{stop:'江津路东门',add:'荆州市华康医院门口','lng':112.226403,'lat':30.351759,'show':true},
+{stop:'三维',add:'人力资源市场','lng':112.232835,'lat':30.350946,'show':true},
+{stop:'汉口银行市公证处，投资广场',add:'汉口银行市公证处对面','lng':112.238227,'lat':30.348022,'show':true},
+{stop:'北湖小区',add:'北湖小区','lng':112.241107,'lat':30.346214,'show':true},
+{stop:'七一一厂',add:'七一一厂','lng':112.2441,'lat':30.343137,'show':true},
+terminal
+
+];
+/*公路局
+途径公交车：34路;60路
+坐标：112.226715,30.353679
+景明观路
+途径公交车：24路; 33路; 34路; 60路; 104路
+坐标：112.233506,30.353441
+草市
+途径公交车：24路; 33路; 34路; 60路; 104路
+坐标：112.238382,30.354866
+
+美林湖畔
+途径公交车：6路; 42路; 49路; 50路
+坐标：112.250335,30.352716
+
+锣场加油站
+途径公交车：7路; 33路; 34路
+坐标：112.351129,30.361786
+*/
+var path11=[
+{stop:'公路局',add:'公路大酒店，公路局对面','lng':112.226715,'lat':30.353679,'show':true},
+{stop:'景明观路站',add:'好邻居对面','lng':112.233506,'lat':30.353441,'show':true},
+{stop:'草市站',add:'玫瑰园酒店(景明观路店)对面','lng':112.238382,'lat':30.354866,'show':true},
+crossroads[35],
+{stop:'美林湖畔',add:'荆沙大道上','lng':112.250335,'lat':30.352716,'show':true},
+crossroads[36],crossroads[37],
+crossroads[14],crossroads[15],crossroads[16],crossroads[17],crossroads[18],
+{stop:'十号路',add:'十号路与老318国道交叉口，红门路与聂沪线交叉口','lng':112.291245,'lat':30.357968,'show':false},
+{stop:'关沮小学',add:'关沮小学','lng':112.29686,'lat':30.358062,'show':false},
+{stop:'银湖',add:'银湖工业园','lng':112.299348,'lat':30.359726,'show':true},
+crossroads[20],
+{stop:'关沮口',add:'关沮','lng':112.303595,'lat':30.370171,'show':true},
+{stop:'关沮四组',add:'关沮四组','lng':112.31251,'lat':30.371294,'show':false},
+{stop:'长湖村',add:'长湖村','lng':112.323275,'lat':30.366895,'show':false},
+{stop:'向湖村',add:'向湖村','lng':112.328971,'lat':30.364468,'show':false},
+{stop:'河垱村',add:'河垱村','lng':112.337124,'lat':30.362818,'show':true},
+{stop:'锣场派出所',add:'湖北省荆州市沙市区东方大道38号','lng':112.342406,'lat':30.361717,'show':false},
+{stop:'锣场镇',add:'湖北省荆州市沙市区东方大道38号','lng':112.34582,'lat':30.360991,'show':false},
+{stop:'锣场镇加油站',add:'','lng':112.351129,'lat':30.361786,'show':true},
+terminal
+];
+
+
+
+/*四医
+金龙路
+途径公交车：2路; 56路
+坐标：112.235418,30.334597
+
+大庆路菜场(嘉艺桥艾乐幼儿园)
+途径公交车：2路
+坐标：112.238591,30.331658
+白云宾馆
+白云路站
+112.242507,30.328807
+武商沙市店
+途径公交车：9路; 10路; 12路; 19路; 70路
+坐标：112.287324,30.309125
+
+三湾路转盘
+途径公交车：9路; 10路; 19路; 28路; 70路
+坐标：112.293446,30.304096
+三湾路
+长港路东口
+途径公交车：9路
+坐标：112.296177,30.305179
+
+恒隆四季城，三湾路口
+途径公交车：9路; 37路; 52路
+坐标：112.298922,30.309466*/
+var path12=[
+{stop:'四医',add:'金龙路一医，西院，肿瘤医院','lng':112.235418,'lat':30.334597,'show':true},
+{stop:'大庆路菜场',add:'大庆路菜场(嘉艺桥艾乐幼儿园)','lng':112.238591,'lat':30.331658,'show':true},
+{stop:'白云宾馆',add:'白云路站','lng':112.242507,'lat':30.328807,'show':true},
+crossroads[31],
+crossroads[38],crossroads[21],
+{stop:'武商',add:'武商沙市店，江津路上','lng':112.287324,'lat':30.309125,'show':true},
+{stop:'三湾路转盘',add:'江津路上','lng':112.293446,'lat':30.304096,'show':true},
+crossroads[2],
+{stop:'三湾路',add:'长港路东口，加油站','lng':112.296177,'lat':30.305179,'show':true},
+terminal
+];
+/*观音垱客运站
+
+途径公交车：7路; 33路; 34路; 67路
+坐标：112.39031,30.367893
+
+花台村
+途径公交车：33路
+坐标：112.36297,30.366563*/
+var path13=[
+{stop:'观音垱七路车站',add:'观音垱客运站','lng':112.39031,'lat':30.367893,'show':true},
+{stop:'花台村',add:'318国道','lng':112.36297,'lat':30.366563,'show':true},
+crossroads[13],terminal
+
+];
+var path14=[
+];
+var path15=[
+];
+
+
+/*
+公交兴城驾校(华美医疗美容)
+途径公交车：10路; 12路; 18路; 19路
+坐标：112.248603,30.335837
+塔桥路上荆沙大道
+东岳小区
+途径公交车：35路; 50路; 56路
+坐标：112.265378,30.336623
+三板桥
+途径公交车：17路; 39路; 69路
+坐标：112.29691,30.319108
+
+三湾路口(沙岑路铁三局)
+铁三局中南处
+途径公交车：9路; 17路; 39路; 52路; 69路
+坐标：112.30136,30.317495
+
+
+跃进村
+途径公交车：9路; 39路; 69路
+坐标：112.322678,30.313022
+跃进家园
+
+
+宿架转盘（沙岑路）
+途径公交车：39路; 69路
+坐标：112.337757,30.31195*/
+
+
+var path16=[
+{stop:'春秋府（公交修理厂大门口）',add:'恒信春秋府对面（公交修理厂大门口）','lng':112.248603,'lat':30.335837,'show':true},
+crossroads[39],crossroads[40],crossroads[41],
+{stop:'东岳小区',add:'东岳小区，荆沙大道','lng':112.265378,'lat':30.336623,'show':true},
+crossroads[33],crossroads[32],
+{stop:'三板桥（沙岑路）',add:'三板桥（沙岑路）','lng':112.29691,'lat':30.319108,'show':true},
+{stop:'三湾路口(沙岑路铁三局)',add:'铁三局中南处','lng':112.30136,'lat':30.317495,'show':true},
+{stop:'跃进（沙岑路）',add:'跃进村','lng':112.322678,'lat':30.313022,'show':true},
+{stop:'宿驾转盘（沙岑路）',add:'久隆汽车动力转向器公司对面座车','lng':112.337757,'lat':30.31195,'show':true},
+terminal
+];
+var path17=[
+];
+var path18=[
+];
+/*凯乐
+大剧院对面的
+公交公司IC卡充值中心门口上车
+
+9路;11路;13路;35路;35路区间
+112.246425,30.323759
+
+三中
+建设银行门口，
+紫云台(中国人寿荆州分公司)
+途径公交车：2路; 4路; 7路; 13路; 14路; 49路
+坐标：112.250573,30.317131
+
+
+
+便河(中信银行荆州分公司)
+途径公交车：3路; 56路
+坐标：112.2539,30.315983
+
+江汉(汀恩医疗美容)
+途径公交车：2路; 3路
+坐标：112.259287,30.313976
+
+
+六中
+途径公交车：5路; 8路; 9路; 10路; 11路; 12路; 13路; 17路; 18路; 24路; 27路; 29路; 37路; 41路; 49路; 52路; 55路; 69路; 70路; 101路; 103路; 104路
+坐标：112.264785,30.312147
+一三五酒店
+
+商业城，
+图书城对面
+途径公交车：8路; 17路; 37路; 49路; 104路
+坐标：112.268076,30.313485
+
+
+烈士陵园
+途径公交车：8路; 17路; 35路; 37路; 49路; 104路
+坐标：112.269655,30.316964
+
+红门路口
+中央华府南，中央华府南门对面
+途径公交车：
+坐标：112.271727,30.318991
+三湾路转盘
+途径公交车：9路; 10路; 19路; 28路; 70路
+坐标：112.293446,30.304096*/
+var path19=[
+{stop:'凯乐',add:'凯乐大剧院对面，公交公司IC卡充值中心门口上车','lng':112.246425,'lat':30.323759,'show':true},
+{stop:'三中',add:'紫云台(中国人寿荆州分公司)，建设银行门口，','lng':112.250573,'lat':30.317131,'show':true},
+{stop:'便河',add:'便河','lng':112.2539,'lat':30.315983,'show':true},
+{stop:'江汉',add:'江汉','lng':112.259287,'lat':30.313976,'show':true},
+{stop:'六中',add:'六中','lng':112.264785,'lat':30.312147,'show':true},
+crossroads[42],
+{stop:'135酒店',add:'图书城对面','lng':112.268076,'lat':30.313485,'show':true},
+{stop:'烈士陵园',add:'','lng':112.269655,'lat':30.316964,'show':true},
+crossroads[43],
+
+{stop:'红门路口',add:'中央华府南，中央华府南门对面','lng':112.271727,'lat':30.318991,'show':true},
+crossroads[21],crossroads[22],
+{stop:'三湾路转盘',add:'','lng':112.293446,'lat':30.304096,'show':true},
+terminal
+];
+
+/*市中医院
+途径公交车：9路; 10路; 17路; 19路; 28路; 39路; 70路
+坐标：112.279623,30.31529*/
+
+var path20=[
+{stop:'中医院',add:'中医院对面座车','lng':112.279623,'lat':30.31529,'show':true},
+crossroads[22],crossroads[33],crossroads[11],crossroads[12],
+{stop:'东方大道西口',add:'东方玫瑰园改为东方大道西口','lng':112.335139,'lat':30.293147,'show':true},
+terminal
+];
+
+
+		
+//创建线路站点
+//获取标注点
+function getMarker(point){
+let marker
+let mdPoint=new BMapGL.Point(point.lng, point.lat)
+if(point.show)
+{
+	marker = new BMapGL.Marker(mdPoint,{title: point.stop});        // 创建标注     
+}
+return marker;
+}
+
+//显示标注点
+function showMarker(list){
+	let i=0;
+	for(i=0;i<list.length;i++){
+	let marker=getMarker(list[i]);
+	map.addOverlay(marker); 
+	}
+}
+//获取线路
+
+function getPathPoints(mList){
+	let  mPoints=[];
+	let i=0;
+	for(i=0;i<mList.length;i++){
+		
+		mPoints.push(new BMapGL.Point(mList[i].lng, mList[i].lat))
+	}
+	return mPoints
+
+}
+//显示线路 
+
+function showPath(list,color){
+
+let pathPoints = getPathPoints(list)
+// 绘制线
+let polyline = new BMapGL.Polyline(pathPoints, {
+    strokeColor: color,
+    strokeWeight: 4,
+    strokeOpacity: 0.5
+});
+map.addOverlay(polyline);
+
+}
+function addCircle(cPoint){
+		console.log("@@@@@@@@@@@@")
+		
+let mPoint=new BMapGL.Point(cPoint.lng, cPoint.lat)
+
+
+	 // 创建圆
+    let circle = new BMapGL.Circle(mPoint, 500, 
+	{fillColor:"blue", 
+	strokeWeight: 1 ,
+	fillOpacity: 0.1, 
+	strokeOpacity: 0.3
+	});
+	return circle
+}
+   //显示圆
+function showCircle(list){
+	let i=0;
+	for(i=0;i<list.length;i++){
+	if(list[i].show){
+	let mCircle=addCircle(list[i])
+	map.addOverlay(mCircle); 
+	}
+	
+	}
+}
+//显示标签信息
+function addLable(lPoint){
+let opts = {
+    position: new BMapGL.Point(lPoint.lng, lPoint.lat), // 指定文本标注所在的地理位置
+    offset: new BMapGL.Size(0, -30) // 设置文本偏移量
+};
+// 创建文本标注对象
+let label = new BMapGL.Label(lPoint.stop, opts);
+// 自定义文本标注样式
+label.setStyle({
+    color: 'blue',
+    borderRadius: '5px',
+    borderColor: '#ccc',
+    padding: '2px',
+    fontSize: '14px',
+    height: '20px',
+    lineHeight: '20px',
+    fontFamily: '微软雅黑'
+});
+return label
+}
+//显示标签信息
+function showLable(list){
+let i=0;
+	for(i=0;i<list.length;i++){
+	if(list[i].show){
+	let label=addLable(list[i])
+	map.addOverlay(label);
+	}
+	
+	}
+}
+ // 添加线路
+    function mAddOverlay(e) {
+
+
+    showLineInfo(allList[e],'red')
+      
+    }
+// 清除覆盖物
+    function removeOverlay() {
+        map.clearOverlays();
+    }
+
+function showLineInfo(line,color){
+
+showMarker(line)
+showPath(line,color)
+showCircle(line)
+showLable(line)
+}
+let colorList=['red','blue','black','yellow','Pink'];
+let allList=[
+path01,
+path02,
+path03,
+path05,
+path06,
+path07,
+path08,
+path09,
+path10,
+path11,
+path12,
+path13,
+path16,
+path19,
+path20
+];
+
+function showAllList(aList,cList){
+let i=0;
+	for(i=0;i<aList.length;i++){
+		showLineInfo(aList[i],cList[i%4])
+	}
+}
+function showAllMarker(aList){
+let i=0;
+	for(i=0;i<aList.length;i++){
+		showMarker(aList[i])
+		showCircle(aList[i])
+		showLable(aList[i])
+	}
+}
+function showAllPath(aList,cList){
+let i=0;
+	for(i=0;i<aList.length;i++){
+		showPath(aList[i],cList[i%4])
+	}
+}
+ //显示全部线路
+function addAllList(){
+      showAllList(allList,colorList)
+}
+ //显示全部站点
+ function addAllMarker(){
+      showAllMarker(allList)
+}
+ //显示全部范围
+ function addAllPath(){
+      showAllPath(allList,colorList)
+}
+
+</script>
